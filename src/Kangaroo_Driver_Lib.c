@@ -31,6 +31,8 @@ mraa_uart_context uart_setup() {
     mraa_uart_set_mode(uart0, 8,MRAA_UART_PARITY_NONE , 1);
   	mraa_uart_set_baudrate(uart0, 9600);
 
+  	//wait for 3 seconds to allow time for things to settle down
+  	sleep(3);
 	return uart0;
 }
 
@@ -66,6 +68,27 @@ uint16_t crc14(const uint8_t* data, size_t length) {
 	return crc ^ 0x3fff;
 }
 
+/*
+ * ! Bit-packs a number.
+ *param buffer The buffer to write into.
+ *param number The number to bit-pack. Should be between -(2^29-1) and 2^29-1.
+ *return How many bytes were written (1 to 5).
+ */
+size_t bitpackNumber(uint8_t* buffer, int32_t number)
+{
+ size_t i = 0;
+
+ if (number < 0) { number = -number; number <<= 1; number |= 1; }
+ else { number <<= 1; }
+
+ while (i < 5)
+ {
+ buffer[i ++] = (number & 0x3f) | (number >= 0x40 ? 0x40 : 0x00);
+ number >>= 6; if (!number) { break; }
+ }
+
+ return i;
+}
 
 /**********************************************************************************************
  * Function:        write_kangaroo_command(uint8_t address, uint8_t command, const uint8_t* data,
@@ -123,3 +146,32 @@ void start_channel(mraa_uart_context uart, uint8_t address, uint8_t channel_name
 
     fprintf(stdout, "Channel Initialized!\n");
 }
+
+/**********************************************************************************************
+ * Function:        writeMoveSpeed
+ * 					moves the motor at a speed (in mm/s), given our motor setup
+ * Input:           address: the address of the Kangaroo.
+ *                  channel_name: the name of the channel that will be initialized.
+ *                  uart: the uart context to be written to
+ *                  speed:
+ *                  speedlimit:
+ *
+ * Output:          None.
+ * Notes:           Drives the sabertooth at a set speed
+ *********************************************************************************************/
+void writeMoveSpeed(mraa_uart_context uart, uint8_t address, uint8_t channel_name, int32_t velocity){
+	uint8_t flag = 0; // No options
+	uint8_t type = 2; // Speed Control
+	uint8_t data[8];
+	uint8_t length = 0;
+	data[length ++] = channel_name;
+	data[length ++] = flag;
+	data[length ++] = type;
+	length += bitpackNumber(&data[length], velocity);
+	uint8_t buffer[length+5];
+
+	write_kangaroo_command(address, CMD_MOVE, data, length, buffer);
+	mraa_uart_write(uart, buffer, length+5);
+
+}
+
