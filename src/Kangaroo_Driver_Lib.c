@@ -2,7 +2,7 @@
  * Kangaroo_Driver_Lib.c
  *
  *  Created on: Feb 27, 2016
- *      Author: Yuqi (Mark) Zhao and Gustavo Olveira
+ *      Author: Yuqi (Mark) Zhao and Gustavo Oliveira
  */
 
 #include "Kangaroo_Driver_Lib.h"
@@ -126,7 +126,7 @@ size_t write_kangaroo_command(uint8_t address, uint8_t command, const uint8_t* d
  * Function:        start_channel(uint8_t address, uint8_t channel_name)
  * Input:           address: the address of the Kangaroo.
  *                  channel_name: the name of the channel that will be initialized.
- *                  uart: the uart context to be written to
+ *                  uart: the uart context to be written to.
  * Output:          None.
  * Notes:           Starts a channel. The Kangaroo LED will shine brightly for a third of a
  *                  second. You must call this before Units, Home or Move commands will work.
@@ -148,16 +148,14 @@ void start_channel(mraa_uart_context uart, uint8_t address, uint8_t channel_name
 }
 
 /**********************************************************************************************
- * Function:        writeMoveSpeed
- * 					moves the motor at a speed (in mm/s), given our motor setup
+ * Function:        writeMoveSpeed (mraa_uart_context uart, uint8_t address, uint8_t channel_name, 
+ * 				    int32_t velocity)
  * Input:           address: the address of the Kangaroo.
  *                  channel_name: the name of the channel that will be initialized.
- *                  uart: the uart context to be written to
- *                  speed:
- *                  speedlimit:
- *
+ *                  uart: the uart context to be written to.
+ *		    velocity: the desired motor speed.
  * Output:          None.
- * Notes:           Drives the sabertooth at a set speed
+ * Notes:           Moves the motor at a speed (in mm/s), given our motor setup.
  *********************************************************************************************/
 void writeMoveSpeed(mraa_uart_context uart, uint8_t address, uint8_t channel_name, int32_t velocity){
 	uint8_t flag = 0; // No options
@@ -175,3 +173,26 @@ void writeMoveSpeed(mraa_uart_context uart, uint8_t address, uint8_t channel_nam
 
 }
 
+/**********************************************************************************************
+ * Function:        power_down_channel(mraa_uart_context uart, uint8_t address, uint8_t channel_name)
+ * Input:           address: the address of the Kangaroo.
+ *                  channel_name: the name of the channel that will be initialized.
+ *                  uart: the uart context to be written to.
+ * Output:          None.
+ * Notes:           Powers down the channel.
+ *********************************************************************************************/
+void power_down_channel(mraa_uart_context uart, uint8_t address, uint8_t channel_name){
+	uint8_t flag = 0; // No options
+	uint8_t sys_cmd_num = SYS_CMD_PWRDOWN; // power down channel
+	uint8_t length = 0;
+	uint8 data[3];
+	
+	data[length++] = channel_name;
+	data[length++] = flag;
+	data[length++] = sys_cmd_num;
+	
+	uint8_t buffer[length+5];
+	
+	write_kangaroo_command(address, CMD_SYSTEM, data, length, buffer);
+	mraa_uart_write(uart, buffer, length+5);
+}
