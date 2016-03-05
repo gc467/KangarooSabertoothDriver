@@ -26,6 +26,8 @@
     void start_channel(mraa_uart_context uart, uint8_t address, uint8_t channel_name);
 
     void writeMoveSpeed(mraa_uart_context uart, uint8_t address, uint8_t channel_name, int32_t velocity);
+    
+    void power_down_channel(mraa_uart_context uart, uint8_t address, uint8_t channel_name);
 
 #endif /* KANGAROO_DRIVER_LIB_H_ */
 
