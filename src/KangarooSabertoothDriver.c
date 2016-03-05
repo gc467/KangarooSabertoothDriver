@@ -21,9 +21,13 @@ int main(){
 	start_channel(uart0, address, channelName);
 
 
-	int32_t vel = -3000;
+	int32_t vels[11] = {-5000, -4000, -3000, -2000, -1000, 0 ,1000 ,2000, 3000, 4000, 5000};
 
-	writeMoveSpeed(uart0, address, channelName, vel);
+	for(int i = 0; i <= 10; i++){
+		writeMoveSpeed(uart0, address, channelName, vels[i]);
+		sleep(5);
+	}
+
 	fprintf(stdout,"yo");
 
 
