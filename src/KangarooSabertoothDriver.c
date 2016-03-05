@@ -19,19 +19,29 @@ int main(){
 
 
 	start_channel(uart0, address, channelName);
-	readMoveSpeed(uart0, address, channelName);
-
-	int32_t vels[11] = {-5000, -4000, -3000, -2000, -1000, 0 ,1000 ,2000, 3000, 4000, 5000};
-	writeMoveSpeed(uart0, address, channelName, vels[1]);
-	sleep(3);
-	readMoveSpeed(uart0, address, channelName);
 	sleep(5);
-	writeMoveSpeed(uart0, address, channelName, vels[10]);
-	sleep(3);
-	readMoveSpeed(uart0, address, channelName);
-	sleep(5);
-	fprintf(stdout,"yo");
+	//readMoveSpeed(uart0, address, channelName);
 
+	int32_t vels[11] = {-1000, -4000, -3000, -2000, -1000, 0 ,1000 ,2000, 3000, 4000, 1000};
+
+	writeMoveSpeed(uart0, address, channelName, vels[5]);
+		sleep(3);
+		readMoveSpeed(uart0, address, channelName);
+		sleep(5);
+		writeMoveSpeed(uart0, address, channelName, vels[6]);
+			sleep(3);
+			readMoveSpeed(uart0, address, channelName);
+			sleep(5);
+			writeMoveSpeed(uart0, address, channelName, vels[7]);
+				sleep(3);
+				readMoveSpeed(uart0, address, channelName);
+				sleep(5);
+				writeMoveSpeed(uart0, address, channelName, vels[8]);
+					sleep(3);
+					readMoveSpeed(uart0, address, channelName);
+					sleep(5);
+					readMoveSpeed(uart0, address, channelName);
+					sleep(5);
 	//Power down channel
 	power_down_channel(uart0, address, channelName);
 
