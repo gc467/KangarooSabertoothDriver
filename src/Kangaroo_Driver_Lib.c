@@ -90,6 +90,18 @@ size_t bitpackNumber(uint8_t* buffer, int32_t number)
  return i;
 }
 
+int32_t unpackNumber(uint8_t* buffer, uint8_t dataLength){
+
+	uint32_t encodedNumber = 0;
+	uint8_t shift = 0;
+	int i;
+	for (i = 6; i < (6 + dataLength - 3); i++) {
+		encodedNumber |= (uint32_t)(buffer[i] & 0x3f) << shift;
+		shift +=6;
+	}
+	return (encodedNumber & 1) ? -(int32_t)(encodedNumber >> 1) : (int32_t)(encodedNumber >> 1);
+}
+
 /**********************************************************************************************
  * Function:        write_kangaroo_command(uint8_t address, uint8_t command, const uint8_t* data,
                                            uint8_t length, uint8_t* buffer)
@@ -185,7 +197,7 @@ void power_down_channel(mraa_uart_context uart, uint8_t address, uint8_t channel
 	uint8_t flag = 0; // No options
 	uint8_t sys_cmd_num = SYS_CMD_PWRDOWN; // power down channel
 	uint8_t length = 0;
-	uint8 data[3];
+	uint8_t data[3];
 	
 	data[length++] = channel_name;
 	data[length++] = flag;
@@ -196,3 +208,56 @@ void power_down_channel(mraa_uart_context uart, uint8_t address, uint8_t channel
 	write_kangaroo_command(address, CMD_SYSTEM, data, length, buffer);
 	mraa_uart_write(uart, buffer, length+5);
 }
+
+/**********************************************************************************************
+ * Function:        readMoveSpeed (mraa_uart_context uart, uint8_t address, uint8_t channel_name)
+ * Input:           address: the address of the Kangaroo.
+ *                  channel_name: the name of the channel that will be initialized.
+ *                  uart: the uart context to be written to.
+ * Output:          None.
+ * Notes:           Sends command to read motor speed at a speed (in mm/s), given our motor setup.
+ *********************************************************************************************/
+struct velocity_Data readMoveSpeed(mraa_uart_context uart, uint8_t address, uint8_t channel_name){
+	uint8_t flag = 0; // No options
+	uint8_t parameters = 2; //Current Speed
+	uint8_t data[3];
+	uint8_t length = 0;
+	data[length ++] = channel_name;
+	data[length ++] = flag;
+	data[length ++] = parameters;
+	uint8_t buffer[length+5];
+
+	//First send the "GET" command
+	write_kangaroo_command(address, CMD_GET, data, length, buffer);
+	mraa_uart_write(uart, buffer, length+5);
+
+	int maxLength = 13;
+	int i = 0;
+	uint8_t dataBuffer[maxLength]; //Maximum size of return data
+	for(i = 0; i < maxLength; i++){
+		dataBuffer[i] = -1;
+	}
+	mraa_uart_read(uart, dataBuffer, 13);
+	fprintf(stdout,"\nNEW CMD:");
+	for(i = 0; i < 13; i++){
+		fprintf(stdout," %d ", dataBuffer[i]);
+	}
+
+	//Decode the data
+	struct velocity_Data returnData;
+	if((dataBuffer[0] == address) && (dataBuffer[1] == CMD_REPLY) && (dataBuffer[3] == channel_name)){
+		//The data buffer is correct
+		returnData.error = dataBuffer[4];
+		uint8_t dataLength = dataBuffer[2];
+		int32_t velocity = unpackNumber(dataBuffer, dataLength);
+		returnData.velocity = velocity;
+	}
+	else{
+		returnData.error = -1;
+		returnData.velocity = 0;
+	}
+	fprintf(stdout, "errorcode: %d, velocity: %d\n", returnData.error, returnData.velocity);
+
+	return returnData;
+}
+

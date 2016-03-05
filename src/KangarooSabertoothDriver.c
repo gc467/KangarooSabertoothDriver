@@ -19,17 +19,21 @@ int main(){
 
 
 	start_channel(uart0, address, channelName);
-
+	readMoveSpeed(uart0, address, channelName);
 
 	int32_t vels[11] = {-5000, -4000, -3000, -2000, -1000, 0 ,1000 ,2000, 3000, 4000, 5000};
-
-	for(int i = 0; i <= 10; i++){
-		writeMoveSpeed(uart0, address, channelName, vels[i]);
-		sleep(5);
-	}
-
+	writeMoveSpeed(uart0, address, channelName, vels[1]);
+	sleep(3);
+	readMoveSpeed(uart0, address, channelName);
+	sleep(5);
+	writeMoveSpeed(uart0, address, channelName, vels[10]);
+	sleep(3);
+	readMoveSpeed(uart0, address, channelName);
+	sleep(5);
 	fprintf(stdout,"yo");
 
+	//Power down channel
+	power_down_channel(uart0, address, channelName);
 
 	//Destroy the uart context
 	uart_destroy(uart0);
