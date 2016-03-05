@@ -15,13 +15,16 @@
 #define CMD_MOVE				36
 #define CMD_GET					35
 #define CMD_REPLY				67
+#define CMD_SYSTEM      37
 
-#define GET_ERR_NOERROR			0
+#define GET_ERR_NOERROR       0
 #define GET_ERR_CHNOTSTARTED	1
 #define GET_ERR_CHNEEDSHOMED	2
 #define GET_ERR_CNTRLERROR		3
-#define GET_ERR_WRONGMODE		4
+#define GET_ERR_WRONGMODE     4
 #define GET_ERR_PARAMUNKNOWN	5
 #define GET_ERR_SERTIMEOUT		6
+
+#define SYS_CMD_PWRDOWN       0
 
 #endif /* COMMAND_LIST_H_ */
