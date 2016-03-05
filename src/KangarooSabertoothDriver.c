@@ -21,6 +21,8 @@ int main(){
 	start_channel(uart0, address, channelName);
 	sleep(5);
 	//readMoveSpeed(uart0, address, channelName);
+	//Clear the Read buffer from the Kangaroo
+	clearRead(uart0);
 
 	int32_t vels[11] = {-1000, -4000, -3000, -2000, -1000, 0 ,1000 ,2000, 3000, 4000, 1000};
 

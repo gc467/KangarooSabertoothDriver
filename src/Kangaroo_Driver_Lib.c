@@ -214,8 +214,8 @@ void power_down_channel(mraa_uart_context uart, uint8_t address, uint8_t channel
  * Input:           address: the address of the Kangaroo.
  *                  channel_name: the name of the channel that will be initialized.
  *                  uart: the uart context to be written to.
- * Output:          None.
- * Notes:           Sends command to read motor speed at a speed (in mm/s), given our motor setup.
+ * Output:          A struct containing the velocity and error codes of the read data
+ * Notes:
  *********************************************************************************************/
 struct velocity_Data readMoveSpeed(mraa_uart_context uart, uint8_t address, uint8_t channel_name){
 	uint8_t flag = 0; // No options
@@ -230,13 +230,18 @@ struct velocity_Data readMoveSpeed(mraa_uart_context uart, uint8_t address, uint
 	//First send the "GET" command
 	write_kangaroo_command(address, CMD_GET, data, length, buffer);
 	mraa_uart_write(uart, buffer, length+5);
-
 	int maxLength = 13;
 	int i = 0;
 	uint8_t dataBuffer[maxLength]; //Maximum size of return data
 	for(i = 0; i < maxLength; i++){
 		dataBuffer[i] = -1;
 	}
+
+	//While data is not available, do nothing
+	while(!mraa_uart_data_available(uart, 0)){
+		fprintf(stdout, "DATA NOT AVAILABLE");
+	}
+
 	mraa_uart_read(uart, dataBuffer, 13);
 	fprintf(stdout,"\nNEW CMD:");
 	for(i = 0; i < 13; i++){
@@ -261,3 +266,17 @@ struct velocity_Data readMoveSpeed(mraa_uart_context uart, uint8_t address, uint
 	return returnData;
 }
 
+
+/**********************************************************************************************
+ * Function:        clearRead(mraa_uart_context uart)
+ * Input:           uart: the uart context to be cleared
+ * Output:          None.
+ * Notes:           Clears the read buffer of the uart context
+ *********************************************************************************************/
+void clearRead(mraa_uart_context uart){
+	while(mraa_uart_data_available(uart, 0)){
+		uint8_t clearBuffer[1];
+		mraa_uart_read(uart, clearBuffer, 1);
+		fprintf(stdout, "Cleared one byte");
+	}
+}
